@@ -1,0 +1,50 @@
+---
+# tasks/main.yml — stratum-factory-ansible-ocserv
+# Install ocserv, generate self-signed TLS cert, and deploy config.
+
+- name: Install ocserv
+  ansible.builtin.package:
+    name: ocserv
+    state: present
+
+- name: Create certificate directory
+  ansible.builtin.file:
+    path: "{{ ocserv_cert_dir }}"
+    state: directory
+    mode: "0700"
+    owner: root
+    group: root
+
+- name: Generate private key
+  community.crypto.openssl_privatekey:
+    path: "{{ ocserv_cert_dir }}/server.key"
+    size: 4096
+
+- name: Generate certificate signing request
+  community.crypto.openssl_csr:
+    path: "{{ ocserv_cert_dir }}/server.csr"
+    privatekey_path: "{{ ocserv_cert_dir }}/server.key"
+    common_name: "{{ ocserv_cert_cn }}"
+
+- name: Generate self-signed certificate
+  community.crypto.x509_certificate:
+    path: "{{ ocserv_cert_dir }}/server.crt"
+    privatekey_path: "{{ ocserv_cert_dir }}/server.key"
+    csr_path: "{{ ocserv_cert_dir }}/server.csr"
+    provider: selfsigned
+    selfsigned_not_after: "+{{ ocserv_cert_days }}d"
+
+- name: Deploy ocserv configuration
+  ansible.builtin.template:
+    src: ocserv.conf.j2
+    dest: /etc/ocserv/ocserv.conf
+    mode: "0640"
+    owner: root
+    group: root
+  notify: restart ocserv
+
+- name: Enable and start ocserv service
+  ansible.builtin.service:
+    name: ocserv
+    enabled: true
+    state: started

@@ -1,0 +1,52 @@
+---
+# molecule/default/verify.yml — stratum-factory-ansible-ocserv
+# Assertions:
+#   1. ocserv service is active
+#   2. Self-signed certificate exists at the expected path
+#   3. /etc/ocserv/ocserv.conf contains the PAM auth directive
+
+- name: Verify
+  hosts: all
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Collect ocserv service status
+      ansible.builtin.command: systemctl is-active ocserv
+      register: ocserv_service_status
+      changed_when: false
+      failed_when: false
+
+    - name: Assert ocserv service is active
+      ansible.builtin.assert:
+        that:
+          - ocserv_service_status.stdout == "active"
+        fail_msg: "ocserv service is not active (got: {{ ocserv_service_status.stdout }})"
+        success_msg: "ocserv service is active"
+
+    - name: Assert self-signed certificate exists
+      ansible.builtin.stat:
+        path: /etc/ocserv/certs/server.crt
+      register: cert_stat
+
+    - name: Assert certificate file is present
+      ansible.builtin.assert:
+        that:
+          - cert_stat.stat.exists
+        fail_msg: "Certificate /etc/ocserv/certs/server.crt does not exist"
+        success_msg: "Certificate /etc/ocserv/certs/server.crt is present"
+
+    - name: Read ocserv.conf
+      ansible.builtin.slurp:
+        src: /etc/ocserv/ocserv.conf
+      register: ocserv_conf
+
+    - name: Assert ocserv.conf contains PAM auth directive
+      ansible.builtin.assert:
+        that:
+          - >
+            'auth = "pam"' in (ocserv_conf.content | b64decode)
+        fail_msg: >
+          /etc/ocserv/ocserv.conf does not contain 'auth = "pam"'
+        success_msg: >
+          /etc/ocserv/ocserv.conf correctly sets auth = "pam"

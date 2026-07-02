@@ -1,0 +1,36 @@
+---
+# defaults/main.yml — stratum-factory-ansible-ocserv
+# All role inputs. Override in your playbook or inventory vars.
+
+# Port ocserv listens on (TCP + UDP)
+ocserv_port: 443
+
+# NIC bound for incoming VPN connections (external-facing interface)
+ocserv_listen_interface: eth0
+
+# VPN pool assigned to connecting clients
+ocserv_vpn_network: "172.16.10.0"
+ocserv_vpn_netmask: "255.255.255.0"
+
+# Routes pushed to connecting clients
+ocserv_pushed_routes:
+  - "10.100.0.0/255.255.255.0"
+
+# DNS server pushed to clients
+ocserv_dns: "8.8.8.8"
+
+# TLS certificate: Common Name for the self-signed cert
+ocserv_cert_cn: "stratum-bastion"
+
+# Directory where the self-signed cert and key are stored
+ocserv_cert_dir: /etc/ocserv/certs
+
+# Self-signed cert validity in days
+ocserv_cert_days: 3650
+
+# Connection limits
+ocserv_max_clients: 10
+ocserv_max_same_client: 2
+
+# Enable compression on the VPN tunnel
+ocserv_compression: true

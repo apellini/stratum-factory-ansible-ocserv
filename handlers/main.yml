@@ -1,0 +1,7 @@
+---
+# handlers/main.yml — stratum-factory-ansible-ocserv
+
+- name: restart ocserv
+  ansible.builtin.service:
+    name: ocserv
+    state: restarted

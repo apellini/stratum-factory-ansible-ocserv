@@ -1,0 +1,38 @@
+---
+# molecule/default/molecule.yml — stratum-factory-ansible-ocserv
+# Smoke-tests the role inside a privileged Ubuntu 24.04 Docker container.
+# Requires: molecule, molecule-plugins[docker], community.crypto collection.
+
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+
+driver:
+  name: docker
+
+platforms:
+  - name: ocserv-test
+    image: ubuntu:24.04
+    privileged: true
+    command: /lib/systemd/systemd
+    pre_build_image: true
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    tmpfs:
+      - /run
+      - /tmp
+
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      interpreter_python: auto_silent
+  inventory:
+    host_vars:
+      ocserv-test:
+        ocserv_cert_cn: "test-bastion"
+
+verifier:
+  name: ansible

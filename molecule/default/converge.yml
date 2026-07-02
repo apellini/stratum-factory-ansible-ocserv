@@ -1,0 +1,12 @@
+---
+# molecule/default/converge.yml — stratum-factory-ansible-ocserv
+# Applies the role with defaults; cert_cn overridden to "test-bastion"
+# via molecule.yml host_vars.
+
+- name: Converge
+  hosts: all
+  gather_facts: true
+  become: true
+
+  roles:
+    - role: stratum-factory-ansible-ocserv

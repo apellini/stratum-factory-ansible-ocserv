@@ -1,0 +1,96 @@
+---
+# meta/argument_specs.yml — stratum-factory-ansible-ocserv
+# Strict input validation for all role variables.
+
+argument_specs:
+  main:
+    short_description: Install and configure ocserv (OpenConnect VPN server)
+    description: >
+      Installs ocserv, generates a self-signed TLS certificate, and deploys
+      ocserv.conf from a Jinja2 template. Authentication is delegated to PAM
+      (Linux system accounts). Routes to the internal STRATUM VPC are pushed
+      to connecting clients.
+    options:
+      ocserv_port:
+        type: int
+        required: false
+        default: 443
+        description: TCP/UDP port ocserv listens on.
+
+      ocserv_listen_interface:
+        type: str
+        required: false
+        default: eth0
+        description: >
+          Network interface ocserv binds to. Should be the external-facing NIC
+          (the one with the public IP / internet-gateway route).
+
+      ocserv_vpn_network:
+        type: str
+        required: false
+        default: "172.16.10.0"
+        description: >
+          IPv4 network address of the VPN pool assigned to connecting clients.
+          Must not overlap with any existing network on the bastion.
+
+      ocserv_vpn_netmask:
+        type: str
+        required: false
+        default: "255.255.255.0"
+        description: Subnet mask for the VPN pool (dotted-decimal notation).
+
+      ocserv_pushed_routes:
+        type: list
+        elements: str
+        required: false
+        default:
+          - "10.100.0.0/255.255.255.0"
+        description: >
+          List of CIDR routes (in network/mask dotted-decimal notation) pushed
+          to VPN clients. Allows clients to reach the internal STRATUM VPC.
+
+      ocserv_dns:
+        type: str
+        required: false
+        default: "8.8.8.8"
+        description: DNS server address pushed to VPN clients.
+
+      ocserv_cert_cn:
+        type: str
+        required: false
+        default: "stratum-bastion"
+        description: Common Name (CN) for the self-signed TLS certificate.
+
+      ocserv_cert_dir:
+        type: str
+        required: false
+        default: /etc/ocserv/certs
+        description: >
+          Filesystem path where the self-signed certificate and private key
+          are stored. Created with mode 0700 (root only).
+
+      ocserv_cert_days:
+        type: int
+        required: false
+        default: 3650
+        description: Validity period of the self-signed certificate, in days.
+
+      ocserv_max_clients:
+        type: int
+        required: false
+        default: 10
+        description: Maximum number of simultaneous VPN clients.
+
+      ocserv_max_same_client:
+        type: int
+        required: false
+        default: 2
+        description: Maximum simultaneous sessions per unique client certificate.
+
+      ocserv_compression:
+        type: bool
+        required: false
+        default: true
+        description: >
+          Whether to enable data compression on the VPN tunnel.
+          Maps to the ocserv `compression` directive.

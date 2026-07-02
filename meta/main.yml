@@ -1,0 +1,31 @@
+---
+# meta/main.yml — stratum-factory-ansible-ocserv
+
+galaxy_info:
+  author: apellini
+  role_name: ocserv
+  namespace: stratum_factory
+  description: >
+    Installs and configures ocserv (OpenConnect SSL VPN server) on the STRATUM dev
+    bastion (Ubuntu 24.04). Generates a self-signed TLS certificate via
+    community.crypto and configures PAM authentication so that Linux system accounts
+    are VPN users. Pushes internal CIDR routes to connecting clients.
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - "24.04"
+  galaxy_tags:
+    - vpn
+    - ocserv
+    - openconnect
+    - tls
+    - pam
+    - stratum
+
+dependencies: []
+
+collections:
+  - ansible.builtin
+  - community.crypto
