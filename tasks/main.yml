@@ -40,6 +40,32 @@
     provider: selfsigned
     selfsigned_not_after: "+{{ ocserv_cert_days }}d"
 
+# When ocserv_listen_interface is explicit, use it as-is (override path; also
+# exercised by molecule tests that pass eth0).  When the default "" is kept, derive
+# the NIC from the default-route interface reported in gathered facts (Ubuntu 24.04
+# on GCP: ens4).  The assert below catches misconfiguration early.
+- name: Resolve ocserv listen interface (explicit override, else default-route interface)
+  ansible.builtin.set_fact:
+    _ocserv_listen_iface: >-
+      {{ ocserv_listen_interface if (ocserv_listen_interface | length > 0)
+         else (ansible_facts.default_ipv4.interface | default('')) }}
+
+- name: Resolve listen-host IP from the interface
+  ansible.builtin.set_fact:
+    _ocserv_listen_host: >-
+      {{ (ansible_facts[_ocserv_listen_iface].ipv4.address | default(''))
+         if (_ocserv_listen_iface | length > 0) else '' }}
+
+- name: Assert ocserv listen-host resolved
+  ansible.builtin.assert:
+    that:
+      - _ocserv_listen_host | length > 0
+    fail_msg: >-
+      Could not resolve ocserv listen-host IP (interface='{{ _ocserv_listen_iface }}').
+      Set ocserv_listen_interface to a valid interface with an IPv4 address, or ensure
+      the default-route interface has one.
+    success_msg: "ocserv will bind listen-host = {{ _ocserv_listen_host }} ({{ _ocserv_listen_iface }})"
+
 - name: Deploy ocserv configuration
   ansible.builtin.template:
     src: ocserv.conf.j2

@@ -20,10 +20,15 @@ argument_specs:
       ocserv_listen_interface:
         type: str
         required: false
-        default: eth0
+        default: ""
         description: >
-          Network interface ocserv binds to. Should be the external-facing NIC
-          (the one with the public IP / internet-gateway route).
+          External-facing NIC name whose IPv4 address becomes the ocserv
+          listen-host directive. Empty string (the default) means auto-detect:
+          the role uses the default-route interface from Ansible gathered facts
+          (Ubuntu 24.04 on GCP this is ens4, not eth0). The role fails fast
+          with a clear message if the interface cannot be resolved. Set
+          explicitly only when the default-route interface is not the desired
+          bind NIC.
 
       ocserv_vpn_network:
         type: str

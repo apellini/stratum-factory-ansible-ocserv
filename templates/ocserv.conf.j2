@@ -13,7 +13,8 @@ server-key = {{ ocserv_cert_dir }}/server.key
 tcp-port = {{ ocserv_port }}
 udp-port = {{ ocserv_port }}
 
-# Bind to the external NIC only
+# Bind only to the resolved external NIC IP (D-INFRA-22)
+listen-host = {{ _ocserv_listen_host }}
 listen-host-is-dyndns = false
 listen-clear-file = /var/run/ocserv-conn.socket
 

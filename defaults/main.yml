@@ -5,8 +5,10 @@
 # Port ocserv listens on (TCP + UDP)
 ocserv_port: 443
 
-# NIC bound for incoming VPN connections (external-facing interface)
-ocserv_listen_interface: eth0
+# External-facing NIC ocserv binds to; its IPv4 becomes the listen-host directive.
+# "" = auto-detect from the default-route interface (Ubuntu 24.04/GCP = ens4).
+# Set explicitly when the default-route interface is not the desired bind NIC.
+ocserv_listen_interface: ""
 
 # VPN pool assigned to connecting clients
 ocserv_vpn_network: "172.16.10.0"

@@ -40,7 +40,7 @@ All variables have defaults in `defaults/main.yml`. Override as needed.
 | Variable | Default | Description |
 |---|---|---|
 | `ocserv_port` | `443` | TCP/UDP port ocserv listens on |
-| `ocserv_listen_interface` | `eth0` | External-facing NIC (public IP side) |
+| `ocserv_listen_interface` | `""` | External-facing NIC whose IPv4 becomes `listen-host`; `""` = auto-detect from default-route interface |
 | `ocserv_vpn_network` | `172.16.10.0` | VPN pool network address assigned to clients |
 | `ocserv_vpn_netmask` | `255.255.255.0` | Subnet mask for the VPN pool |
 | `ocserv_pushed_routes` | `["10.100.0.0/255.255.255.0"]` | Routes pushed to VPN clients |
@@ -92,17 +92,35 @@ already exist).
 
 ---
 
+## Listen-host auto-detection
+
+`ocserv_listen_interface` defaults to `""`, which triggers auto-detection: the role
+resolves the interface from `ansible_facts.default_ipv4.interface` (the NIC carrying the
+default route) and derives its IPv4 address. That IP is rendered as `listen-host` in
+`ocserv.conf`, restricting VPN binds to the external NIC only.
+
+On Ubuntu 24.04 GCP instances the external NIC is `ens4` (not `eth0` — predictable NIC
+naming, D-INFRA-22). Auto-detection is name-agnostic and self-heals across image changes.
+
+Set `ocserv_listen_interface` explicitly only when the default-route interface is not the
+desired bind NIC, or when testing with molecule (container has a single `eth0`).
+
+The role requires `gather_facts: true` (the Ansible default). It fails fast with a clear
+message if the interface cannot be resolved.
+
+---
+
 ## Network context (STRATUM dev bastion)
 
 The bastion has two NICs:
 
-| Interface | Side | Address |
-|---|---|---|
-| `eth0` / nic0 | External VPC (internet-gateway route) | public IP |
-| `eth1` / nic1 | Internal VPC | 10.100.0.2 / 10.100.0.0/24 |
+| NIC | Kernel name | Side | Address |
+|---|---|---|---|
+| nic0 | `ens4` | External VPC (internet-gateway route) | public IP |
+| nic1 | `ens5` | Internal VPC | 10.100.0.2 / 10.100.0.0/24 |
 
-ocserv binds to `eth0` by default. The pushed route `10.100.0.0/255.255.255.0` lets
-VPN clients reach the internal STRATUM VPC directly.
+ocserv auto-detects `ens4` as the listen-host interface (default-route NIC). The pushed
+route `10.100.0.0/255.255.255.0` lets VPN clients reach the internal STRATUM VPC directly.
 
 ---
 

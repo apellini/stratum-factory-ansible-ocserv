@@ -4,6 +4,7 @@
 #   1. ocserv service is active
 #   2. Self-signed certificate exists at the expected path
 #   3. /etc/ocserv/ocserv.conf contains the PAM auth directive
+#   4. /etc/ocserv/ocserv.conf contains a listen-host directive (D-INFRA-22)
 
 - name: Verify
   hosts: all
@@ -50,3 +51,14 @@
           /etc/ocserv/ocserv.conf does not contain 'auth = "pam"'
         success_msg: >
           /etc/ocserv/ocserv.conf correctly sets auth = "pam"
+
+    - name: Assert ocserv.conf contains listen-host directive (D-INFRA-22)
+      ansible.builtin.assert:
+        that:
+          - >
+            'listen-host = ' in (ocserv_conf.content | b64decode)
+        fail_msg: >
+          /etc/ocserv/ocserv.conf does not contain 'listen-host = ' —
+          ocserv_listen_interface auto-detect may have failed
+        success_msg: >
+          /etc/ocserv/ocserv.conf correctly sets listen-host

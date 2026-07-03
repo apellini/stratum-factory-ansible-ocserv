@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.0] - 2026-07-03
+
+### Fixed
+
+- Wire up `ocserv_listen_interface` so `listen-host` is actually rendered in
+  `/etc/ocserv/ocserv.conf` (D-INFRA-22). Previously the variable was declared but never
+  referenced — ocserv silently bound all interfaces (0.0.0.0).
+- Change the default from the broken `eth0` to `""` (auto-detect). The role now resolves
+  the external NIC from `ansible_facts.default_ipv4.interface` and derives its IPv4
+  address; that IP is rendered as `listen-host`, restricting VPN binds to the external
+  NIC only. Ubuntu 24.04 on GCP uses `ens4`/`ens5`, not `eth0`/`eth1`.
+- Add a fail-fast `assert` task so misconfiguration (unresolvable interface) surfaces
+  immediately with a clear message rather than silently producing a broken config.
+
 ## [0.1.3] - 2026-07-03
 
 ### Fixed
