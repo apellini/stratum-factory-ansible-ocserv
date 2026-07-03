@@ -2,6 +2,12 @@
 # tasks/main.yml — stratum-factory-ansible-ocserv
 # Install ocserv, generate self-signed TLS cert, and deploy config.
 
+- name: Update apt package cache (Debian family)
+  ansible.builtin.apt:
+    update_cache: true
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
 - name: Install ocserv
   ansible.builtin.package:
     name: ocserv
