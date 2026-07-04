@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.1] - 2026-07-04
+
+### Fixed
+
+- Remove `listen-clear-file = /var/run/ocserv-conn.socket` from `ocserv.conf.j2`.
+  This directive was removed in ocserv 1.1.2 and causes `config file error` on
+  startup, leaving ocserv in a failed state. The bug was pre-existing in the template
+  but was first triggered by the D-INFRA-22 config redeploy + restart.
+
 ## [0.2.0] - 2026-07-03
 
 ### Fixed

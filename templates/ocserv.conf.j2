@@ -16,7 +16,6 @@ udp-port = {{ ocserv_port }}
 # Bind only to the resolved external NIC IP (D-INFRA-22)
 listen-host = {{ _ocserv_listen_host }}
 listen-host-is-dyndns = false
-listen-clear-file = /var/run/ocserv-conn.socket
 
 # Connection limits
 max-clients = {{ ocserv_max_clients }}
